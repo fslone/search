@@ -4,19 +4,19 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>TweetyWiki Search Engine</title>
+  <title>Tweet/Wiki Search Engine</title>
   <meta name="description" content="A sample search engine using the Wikipedia and Twitter APIs.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/styles.min.css">
 </head>
 
 <body>
-  <div class="advanced_form_container" style="margin:20px;">
-    <form class="inner_container">
+  <div class="container" id="search_container">
+    <form class="inner_container" id="queryForm">
       <fieldset>
         <div class="row">
           <div class="col-xs-12">
-            <h1>TweetyWiki Search Engine</h1>
+            <h1>Tweet/Wiki Search Engine</h1>
           </div>
         </div>
         <div class="row">
@@ -25,19 +25,27 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-8 col-xs-12">
+          <div class="col-xs-12">
             <div class="form-group">
               <input type="text" name="query" id="query_box" class="form form-control" />
             </div>
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-4 col-xs-12">
-            <button class="btn btn-primary">Search</button>
+          <div class="checkbox col-sm-10 col-xs-12">
+            <label for="radius" class="pull-right"><input type="checkbox" name="radius" />Limit results to those near me</label>
+          </div>
+          <div class="col-sm-2 col-xs-12">
+            <button class="btn btn-primary pull-right">Search</button>
           </div>
         </div>
       </fieldset>
     </form>
+  </div>
+  <div class="col-xs-12">
+    <img src="img/wp.png" alt="Wikipedia logo" width="150" class="logo" />
+    <div id="wikipedia_results" class="row col-xs-12">
+    </div>
   </div>
   <script src="js/main.min.js"></script>
 

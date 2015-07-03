@@ -7,13 +7,13 @@ module.exports = function(grunt) {
 	      separator: ";",
 	    },
 	    dist: {
-	      src: ["client/client.js","client/js/vendor/*.js"],
+	      src: ["client/js/vendor/*.js", "client/js/client.js"],
 	      dest: "client/js/main.min.js",
 	    },
 	  },
 	  concat_css: {
     	all: {
-        src: ["client/css/*.css", "client/css/vendor/*.css"],
+        src: ["client/css/vendor/*.css", "client/css/client.css"],
     	   dest: "client/css/styles.min.css"
 	    }
     },
