@@ -31,8 +31,9 @@
     //start listening on specified port
     _server.listen(port);
 
-    _server.get(".*", restify.serveStatic({
-      directory: "../client"
+    _server.get("/", restify.serveStatic({
+      directory: "client",
+      default: "index.html"
     }));
 
   }
