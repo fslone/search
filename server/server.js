@@ -23,7 +23,7 @@
     _server.use(restify.queryParser());
     _server.use(restify.fullResponse());
 
-    _server.opts(/\.*/, function (req, res, next) {
+    _server.opts(/.*/, function (req, res, next) {
       res.send(200);
       next();
     });
@@ -36,7 +36,7 @@
       });
     });
 
-    _server.get(/*.*/, restify.serveStatic({
+    _server.get(/.*/, restify.serveStatic({
       directory: "../client",
       default: "index.html"
     }));
