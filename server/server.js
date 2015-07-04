@@ -3,13 +3,13 @@
       fs = require("fs");
 
   function _init() {
-  	_start(80, 443, "localhost");
+  	_start();
   	_registerRestCalls();
   }
 
-  function _start(port, sslPort, serverIpAddress) {
+  function _start() {
     
-    if (serverIpAddress === undefined) serverIpAddress = "localhost";
+    var port = process.env.PORT || 3000;
     
     //start server
     _server = restify.createServer({
@@ -29,12 +29,7 @@
     });
 
     //start listening on specified port
-    _server.listen(port, function () {
-
-      _server.on("close", function() {
-        console.log("http closed");
-      });
-    });
+    _server.listen(port);
 
     _server.get(/.*/, restify.serveStatic({
       directory: "../client",
