@@ -32,8 +32,11 @@
           </div>
         </div>
         <div class="row">
-          <div class="checkbox col-sm-10 col-xs-12">
-            <label for="radius" class="pull-right"><input type="checkbox" name="radius" />Limit results to those near me</label>
+          <div class="col-sm-2 col-xs-12 error-row">
+            <span></span>
+          </div>
+          <div class="checkbox col-sm-8 col-xs-12">
+            <label for="radius" class="pull-right"><input id="radius" type="checkbox" name="radius" />Limit results to those near me</label>
           </div>
           <div class="col-sm-2 col-xs-12">
             <button class="btn btn-primary pull-right">Search</button>
@@ -41,12 +44,13 @@
         </div>
       </fieldset>
     </form>
-  </div>
-  <div class="col-xs-12">
-    <img src="img/wp.png" alt="Wikipedia logo" width="150" class="logo" />
+    <div class="col-xs-12 hidden-xs logo">
+      <img src="img/wp.png" alt="Wikipedia logo" width="150" />
+    </div>
     <div id="wikipedia_results" class="row col-xs-12">
     </div>
   </div>
+  
   <script src="js/main.min.js"></script>
 
 </body>

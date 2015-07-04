@@ -17,6 +17,12 @@ module.exports = function(grunt) {
     	   dest: "client/css/styles.min.css"
 	    }
     },
+    jsdoc : {
+      dist : {
+        src: ["client/js/client.js"], 
+        dest: "client/doc"
+      }
+    },
     uglify: {
       min: {
         files: [{
@@ -58,6 +64,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-scss");
   grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-jsdoc");
   grunt.loadNpmTasks("grunt-text-replace");
 
   // Register tasks
@@ -65,7 +72,8 @@ module.exports = function(grunt) {
     "concat",
     "concat_css:all",
     "uglify",
-    "cssmin"
+    "cssmin",
+    "jsdoc"
   ]);
 };
 

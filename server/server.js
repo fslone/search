@@ -78,8 +78,7 @@ function _registerRestCalls() {
   	var query = req.params.query;
 
   	// https://api.twitter.com/1.1/search/tweets.json?q=football
-
-    
+ 
   }
 
   function __getWikis(req, res, next) {

@@ -12,8 +12,6 @@
 		$form = $("#queryForm");
 		
 		_bindUI();
-		
-		_initValidation();
 	
 	}
 
@@ -25,35 +23,43 @@
 	function _bindUI() {
 
 		$form.find(".btn-primary").click(function(e) {
-			var query = $("#query_box").val();
+			
+			var $queryBox, query;
+
 			e.preventDefault();
-			$.when(_getWikiResults(query)).then(function(wikipediaResults) {
-				_populateWikipediaResults(wikipediaResults);
-			});
+			
+			$queryBox = $("#query_box");
+			$errorSpan = $(".error-row span");
+
+			query = $queryBox.val();
+
+			if(!query) {
+				$queryBox
+					.closest(".form-group")
+					.addClass("has-error");
+				$errorSpan
+					.text("Please enter a topic.");
+			} else {
+				$queryBox
+					.closest(".form-group")
+					.removeClass("has-error");
+				$errorSpan
+					.text("");
+				$.when(_getWikiResults(query)).then(function(wikipediaResults) {
+					_populateWikipediaResults(wikipediaResults);
+				});
+			}
+
 		});	
 	
 	}
 
 	/**
-    * Initialize validation for the search engine page form
+    * Validate the search box for completeness
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _initValidation() {
-		
-		var rules, messages;
-
-		rules = {
-			query: {
-				required: true
-			}
-		};
-
-		messages = {
-			query: {
-				required: "Please enter a topic..."
-			}
-		};
+	function _validate() {
 
 	}
 
@@ -123,6 +129,7 @@
 		//cache jQuery reference 		
 		$wikipedia_results = $("#wikipedia_results");
 		$wikipedia_results.hide();
+		$wikipedia_results.empty();
 		rowOpen = "<div class='row'>";
 		titleOpen = "<div class='col-sm-4 col-xs-12'><strong>";
 		titleClose = "</strong></div>";
@@ -134,12 +141,12 @@
 		$.each(json.query.search, function(i, result) {
 			row = rowOpen;
 			row += titleOpen + result.title + titleClose;
-			row += snippetOpen + result.snippet + snippetClose;
+			row += snippetOpen + result.snippet + "..." + snippetClose;
 			row += rowClose;
 			$wikipedia_results.append(row)
 		});
 
-		$wikipedia_results.slideDown();
+		$wikipedia_results.slideDown("2000");
 
 	}
 
