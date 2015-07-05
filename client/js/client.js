@@ -62,7 +62,7 @@
 			_getTwitterResults(query)
 		).then(function(wikipediaResults, twitterResults) {
 			_populateWikipediaResults(wikipediaResults);
-			// _populateTwitterResults(wikipediaResults)
+			_populateTwitterResults(twitterResults)
 		});
 
 	}
@@ -178,7 +178,7 @@
       url: url + "?" + query,
       dataType: "text",
       success: function(json) {
-      	promise.resolve($.parseJSON(json).body);
+      	promise.resolve($.parseJSON($.parseJSON(json)));
       }
     });
 
@@ -218,33 +218,21 @@
    */
 	function _populateWikipediaResults(json) {
 		
-		var $search_container, 
-				rowOpen, 
-				rowClose, 
-				titleOpen, 
-				titleClose, 
-				snippetOpen, 
-				snippetClose, 
-				row; 
+		var $search_container, $wikipedia_results, row;
+				
 		
 		//cache jQuery reference 		
 		$wikipedia_results = $("#wikipedia_results");
 		$wikipedia_results.hide();
 		$wikipedia_results.empty();
-		rowOpen = "<div class='row'>";
-		titleOpen = "<div class='col-sm-4 col-xs-12'><strong>";
-		titleClose = "</strong></div>";
-		snippetOpen = "<div class='col-sm-8 col-xs-12'>";
-		snippetClose = "</div>";
-		rowClose = "</div>";
+		
 
 		//loop through each search result and append to the tabl
 		$.each(json.query.search, function(i, result) {
-			row = rowOpen;
-			row += titleOpen + result.title + titleClose;
-			row += snippetOpen + result.snippet + "..." + snippetClose;
-			row += rowClose;
+			
+			row = _buildRow(result.title, result.snippet);
 			$wikipedia_results.append(row)
+
 		});
 
 		$wikipedia_results.slideDown("2000");
@@ -257,37 +245,46 @@
     * @author Fleming Slone [fslone@gmail.com]
    */
 	function _populateTwitterResults(json) {
-		
-		var $search_container, 
-				rowOpen, 
-				rowClose, 
-				titleOpen, 
-				titleClose, 
-				snippetOpen, 
-				snippetClose, 
-				row; 
-		
-		//cache jQuery reference 		
-		$wikipedia_results = $("#wikipedia_results");
-		$wikipedia_results.hide();
-		$wikipedia_results.empty();
-		rowOpen = "<div class='row'>";
-		titleOpen = "<div class='col-sm-4 col-xs-12'><strong>";
-		titleClose = "</strong></div>";
-		snippetOpen = "<div class='col-sm-8 col-xs-12'>";
-		snippetClose = "</div>";
-		rowClose = "</div>";
 
-		//loop through each search result and append to the table
-		$.each(json.query.search, function(i, result) {
-			row = rowOpen;
-			row += titleOpen + result.title + titleClose;
-			row += snippetOpen + result.snippet + "..." + snippetClose;
-			row += rowClose;
-			$wikipedia_results.append(row)
+		var row, $search_container, $twitter_results;
+				
+		//cache jQuery reference 		
+		$twitter_results = $("#twitter_results");
+		$twitter_results.hide();
+		$twitter_results.empty();
+
+		$.each(json.statuses, function(i, result) {
+			row = _buildRow("@" + result.user.screen_name, result.text);
+			$twitter_results.append(row)
 		});
 
-		$wikipedia_results.slideDown("2000");
+		$twitter_results.slideDown("2000");
+
+	}
+
+	function _buildRow(cell1, cell2) {
+		
+		var	rowOpen, 
+				rowClose, 
+				cell1Open, 
+				cell1Close, 
+				cell2Open, 
+				cell2Close, 
+				row; 
+
+		rowOpen = "<div class='row'>";
+		cell1Open = "<div class='col-sm-4 col-xs-12'><strong>";
+		cell1Close = "</strong></div>";
+		cell2Open = "<div class='col-sm-8 col-xs-12'>";
+		cell2Close = "</div>";
+		rowClose = "</div>";
+
+		row = rowOpen;
+		row += cell1Open + cell1 + cell1Close;
+		row += cell2Open + cell2 + cell2Close;
+		row += rowClose;
+
+		return row;
 
 	}
 
