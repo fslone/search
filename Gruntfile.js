@@ -41,18 +41,14 @@ module.exports = function(grunt) {
         }]
       }
     },
-    replace: {
-      replaceCacheBustToken: {
-        src: [
-          "client.js"
-        ],
-        overwrite: true,
-        replacements: [
-          {
-            from: /"\?bust=" \+ \(new Date\(\)\).getTime\(\)/g,
-            to: "\"?bust=<%= grunt.file.readJSON(\"package.json\").version %>\""
-          }
-        ]
+    sass: {                              
+      dist: {                            
+        options: {                       
+          style: "expanded"
+        },
+        files: {                         
+          "client/css/client.css": "client/scss/client.scss",        
+        }
       }
     }
   });
@@ -62,13 +58,13 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-concat-css");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
-  grunt.loadNpmTasks("grunt-contrib-scss");
+  grunt.loadNpmTasks("grunt-sass");
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-jsdoc");
-  grunt.loadNpmTasks("grunt-text-replace");
 
   // Register tasks
   grunt.registerTask("build", [
+    "sass",
     "concat",
     "concat_css:all",
     "uglify",
