@@ -61,8 +61,12 @@
 			_getWikiResults(query), 
 			_getTwitterResults(query)
 		).then(function(wikipediaResults, twitterResults) {
-			_populateWikipediaResults(wikipediaResults);
-			_populateTwitterResults(twitterResults)
+			
+			if(wikipediaResults) _populateWikipediaResults(wikipediaResults);
+
+			//handle twitter api down
+			if(twitterResults) _populateTwitterResults(twitterResults)
+
 		});
 
 	}
@@ -179,6 +183,11 @@
       dataType: "text",
       success: function(json) {
       	promise.resolve($.parseJSON($.parseJSON(json)));
+      },
+      error: function() {
+      	errorRow = _buildErrorRow("Twitter");
+				$("#wikipedia_results").append(errorRow);
+				promise.resolve();
       }
     });
 
@@ -205,6 +214,11 @@
       dataType: "text",
       success: function(json) {
       	promise.resolve($.parseJSON($.parseJSON(json).body));
+      }, 
+      error: function() {
+      	errorRow = _buildErrorRow("Wikipedia");
+				$("#wikipedia_results").append(errorRow);
+				promise.resolve();
       }
     });
 
@@ -219,7 +233,6 @@
 	function _populateWikipediaResults(json) {
 		
 		var $search_container, $wikipedia_results, row;
-				
 		
 		//cache jQuery reference 		
 		$wikipedia_results = $("#wikipedia_results");
@@ -247,7 +260,7 @@
 	function _populateTwitterResults(json) {
 
 		var row, $search_container, $twitter_results;
-				
+
 		//cache jQuery reference 		
 		$twitter_results = $("#twitter_results");
 		$twitter_results.hide();
@@ -286,6 +299,29 @@
 
 		return row;
 
+	}
+
+	function _buildErrorRow(service) {
+		var	rowOpen, 
+				rowClose, 
+				cell1Open, 
+				cell1Close, 
+				cell2Open, 
+				cell2Close, 
+				row; 
+
+		rowOpen = "<div class='row'>";
+		cell1Open = "<div class='col-xs-12 alert alert-danger'><strong>";
+		cell1Close = "</strong></div>";
+		rowClose = "</div>";
+
+		row = rowOpen;
+		row += cell1Open;
+		row += "We're sorry, but the " + service + " API appears to be down."
+		row += cell1Close;
+		row += rowClose;
+
+		return row;
 	}
 
 	return _init();

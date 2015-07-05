@@ -58,10 +58,11 @@
 
       var config, twitter, success, error, results;
 
-      var error = function (err, response, body) {
-        console.log("ERROR [%s]", err);
+      error = function(err) {
+        res.status(500).send({ error: err});
       };
-      success = function (data) {
+
+      success = function(data) {
         res.setHeader("Content-Type", "application/json");
         res.send(data);
       };
@@ -86,9 +87,9 @@
 
       query = req.params.query;
       url = "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch=" + query
-      request.get(url, function(error,response,body){
+      request.get(url, function(err, response, body){
         
-        if(error) console.log(error);
+        if(err) res.status(500).send({ error: err });
         else res.send(response);
 
       });
