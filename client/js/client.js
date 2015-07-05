@@ -3,7 +3,7 @@
 	var $form;
 
 	/**
-    * Initialize the search engine
+    * Initialize the Wikipedia/Twitter search page
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
@@ -24,38 +24,39 @@
    */
 	function _bindUI() {
 
-		$form.find(".btn-primary").click(function(e) {
+		//bind the search button
+		$form
+			.find(".btn-primary")
+			.click(function(e) {
 			
-			var $queryBox, query;
+				e.preventDefault();
+				
+				if(_validate()) _showSearchResults();
 
-			e.preventDefault();
-			
-			$queryBox = $("#query_box");
-			$errorSpan = $(".error-row span");
+			});
 
-			query = $form.serialize();
-
-			if(!query) {
-				$queryBox
-					.closest(".form-group")
-					.addClass("has-error");
-				$errorSpan
-					.text("Please enter a topic.");
-			} else {
-				$queryBox
-					.closest(".form-group")
-					.removeClass("has-error");
-				$errorSpan
-					.text("");
-				_showSearchResults();
-			}
-
-		});	
+		//bind the return key
+		$form
+			.find("#query_box")
+			.on("keypress", function(e) {
+				if(e.which===13) {
+					if(_validate()) _showSearchResults();
+				}
+			});
 	
 	}
 
+	/**
+    * Display the Wikipedia/Twitter search results on the page
+    *
+    * @author Fleming Slone [fslone@gmail.com]
+   */
 	function _showSearchResults() {
-		var query = $form.serialize();
+
+		var query;
+
+		query = $form.serialize();
+
 		$.when(
 			_getWikiResults(query), 
 			_getTwitterResults(query)
@@ -82,7 +83,7 @@
 		$(window)
 			.unload(function(){
 
-				var time, queryVal, radius, formState;
+				var time, queryVal, radiusVal, formState;
 
 				time = new Date().getTime();
 				queryVal = $queryBox.val();
@@ -127,6 +128,35 @@
    */
 	function _validate() {
 
+		var $queryBox, $errorSpan, query;
+
+
+		$queryBox = $form.find("#query_box");
+		$errorSpan = $form.find(".error-row span");
+		query = $queryBox.val();
+
+		if(!query) {
+
+			$queryBox
+				.closest(".form-group")
+				.addClass("has-error");
+			$errorSpan
+				.text("Please enter a topic.");
+
+			return false;
+
+		} else {
+
+			$queryBox
+				.closest(".form-group")
+				.removeClass("has-error");
+			$errorSpan
+				.text("");
+
+			return true;
+
+		}
+
 	}
 
 	/**
@@ -148,7 +178,7 @@
       url: url + "?" + query,
       dataType: "text",
       success: function(json) {
-      	promise.resolve($.parseJSON(json));
+      	promise.resolve($.parseJSON(json).body);
       }
     });
 
