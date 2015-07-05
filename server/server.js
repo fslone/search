@@ -13,7 +13,15 @@
 
   function _start() {
     
-    var port = process.env.PORT || 3000;
+    var port, clientDir;
+    
+    if(process.env.PORT) {
+      port = process.env.PORT;
+      clientDir = "client";
+    } else {
+      port = 3000;
+      clientDir = "../client";
+    }
     
     //start server
     _server = restify.createServer({
@@ -33,7 +41,7 @@
     _registerRestCalls();
 
     _server.get(/\/?.*/, restify.serveStatic({
-      directory: "../client",
+      directory: clientDir,
       default: "index.html"
     }));
 
