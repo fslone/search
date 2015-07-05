@@ -1,7 +1,11 @@
 (function() {
   var restify = require("restify"),
-      fs = require("fs");
+      fs = require("fs"),
+      Twitter = require("twitter-node-client").Twitter,
+      request = require("request");
 
+  var _server;
+      
   function _init() {
   	_start();
   	_registerRestCalls();
@@ -23,44 +27,68 @@
     _server.use(restify.queryParser());
     _server.use(restify.fullResponse());
 
-    _server.opts(/.*/, function (req, res, next) {
-      res.send(200);
-      next();
-    });
-
     //start listening on specified port
     _server.listen(port);
 
+    _registerRestCalls();
+
     _server.get(/\/?.*/, restify.serveStatic({
-      directory: "client",
+      directory: "../client",
       default: "index.html"
     }));
+
 
   }
 
   function _registerRestCalls() {
 
-    _server.get("restapi/GetTweets", __getTweets);
+    _server.get("/restapi/GetTweets", __getTweets);
 
-    _server.get("restapi/GetWikis", __getWikis);
+    _server.get("/restapi/GetWikis", __getWikis);
 
     function __getTweets(req, res, next) {
 
-    	var query = req.params.query;
+      var config, twitter, success, error, results;
 
-    	// https://api.twitter.com/1.1/search/tweets.json?q=football
+      var error = function (err, response, body) {
+        console.log("ERROR [%s]", err);
+      };
+      success = function (data) {
+        res.setHeader("Content-Type", "application/json");
+        res.send(data);
+      };
+ 
+      config = {
+        "consumerKey": "teATP6CzUAiHY5YkgTSgmMShy",
+        "consumerSecret": "IwzdFOVGibCqPoFPOVnHQQ9c50BnoPJFUCbFl6fVrHvnJiB0j0",
+        "accessToken": "3187974576-OunyzrPMhm3fw7yESmK6wNvQ4jQHHX7Gnp6gU7w",
+        "accessTokenSecret": "bdG98MerHAKwNywr4aXHO4er4hQcD1601J0UgNO9aGZWS",
+        "callBackUrl": ""
+      };
    
+      twitter = new Twitter(config);
+
+      twitter.getSearch({"q":req.params.query, "count": 10, "result\_type":"popular"}, error, success);
+      
     }
 
     function __getWikis(req, res, next) {
 
-    	var query = req.params.query;
+    	var query, url;
 
-    	//
-      
+      query = req.params.query;
+      url = "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch=" + query
+      request.get(url, function(error,response,body){
+        
+        if(error) console.log(error);
+        else res.send(response);
+
+      });
+
     }
 
   }
+
   return _init();
-  //https://api.twitter.com/1.1/search/tweets.json?q=%23superbowl
+
 }());
