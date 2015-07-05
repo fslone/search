@@ -6,15 +6,17 @@
   "author": "Fleming Slone <fslone@gmail.com>",
   "description": "A sample search engine using the Wikipedia and Twitter APIs.",
   "devDependencies": {
+    "chai": "^3.0.0",
     "grunt": "^0.4.5",
     "grunt-concat-css": "^0.3.1",
-    "grunt-contrib-copy": "^0.5.0",
     "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-copy": "^0.5.0",
     "grunt-contrib-cssmin": "^0.11.0",
-    "grunt-sass": "^1.0.0",
     "grunt-contrib-uglify": "^0.4.0",
     "grunt-jsdoc": "^0.6.7",
-    "grunt-mkdir": "^0.1.1"
+    "grunt-mkdir": "^0.1.1",
+    "grunt-sass": "^1.0.0",
+    "mocha": "^2.2.5"
   },
   "dependencies": {
     "restify": "^3.0.3",
