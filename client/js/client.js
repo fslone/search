@@ -1,188 +1,190 @@
 var searchEngine = (function() {
-	
-	var $form,
-			$queryBox,
-			$radius;
+  
+  //setup some refrences that will be used 
+  //across multiple functions
+  var $form,
+      $queryBox,
+      $radius;
 
   /**
     * Initialize the Wikipedia/Twitter search page
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _init() {
-		
-		//cache some refrences that will be used 
-		//across multiple functions
-		$form = $("#queryForm");
-		$queryBox = $form.find("#query_box");
-		$radius = $form.find("#radius");
-		
-		_bindUI();
+  function _init() {
+    
+    //cache some refrences that will be used 
+    //across multiple functions
+    $form = $("#queryForm");
+    $queryBox = $form.find("#query_box");
+    $radius = $form.find("#radius");
+    
+    _bindUI();
 
-		_bindRefresh();
-	
-	}
+    _bindRefresh();
+  
+  }
 
   /**
     * Bind UI elements for the search engine page
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _bindUI() {
+  function _bindUI() {
 
-		//bind the search button
-		$form
-			.find(".btn-primary")
-			.click(function(e) {		
-				var query;
-				e.preventDefault();		
-				query = $queryBox.val();
-				if(_validate(query)) _showSearchResults();
-			});
+    //bind the search button
+    $form
+      .find(".btn-primary")
+      .click(function(e) {    
+        var query;
+        e.preventDefault();    
+        query = $queryBox.val();
+        if(_validate(query)) _showSearchResults();
+      });
 
-		//bind the return key
-		$queryBox
-			.on("keypress", function(e) {
-				var query;
-				if(e.which===13) {
-					query = $queryBox.val();
-					if(_validate(query)) _showSearchResults();
-				}
-			});
-	
-	}
+    //bind the return key
+    $queryBox
+      .on("keypress", function(e) {
+        var query;
+        if(e.which===13) {
+          query = $queryBox.val();
+          if(_validate(query)) _showSearchResults();
+        }
+      });
+  
+  }
 
-	/**
+  /**
     * Re-populate the search box, radius checkbox and search results 
     * if the page is refreshed.
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _bindRefresh() {
+  function _bindRefresh() {
 
-		$(window)
-			.unload(function(){
-				_setFormState();
-			})
-			.load(function() {
-				_loadFromFormState();
-			});
+    $(window)
+      .unload(function(){
+        _setFormState();
+      })
+      .load(function() {
+        _loadFromFormState();
+      });
 
-	}
+  }
 
-	/**
+  /**
     * Set formState object in localStorage to save last page visit
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _setFormState() {
+  function _setFormState() {
 
-		var time, 
-				queryVal, 
-				radiusVal, 
-				formState;
+    var time, 
+        queryVal, 
+        radiusVal, 
+        formState;
 
-		time = new Date().getTime();
-		queryVal = $queryBox.val();
-		radiusVal = $radius.is(":checked");
-		formState = {
-			query: queryVal,
-			radius: radiusVal,
-			unloadTime: time
-		};
+    time = new Date().getTime();
+    queryVal = $queryBox.val();
+    radiusVal = $radius.is(":checked");
+    formState = {
+      query: queryVal,
+      radius: radiusVal,
+      unloadTime: time
+    };
 
-		localStorage.setItem("formState", JSON.stringify(formState));
+    localStorage.setItem("formState", JSON.stringify(formState));
 
-	}
+  }
 
-	/**
+  /**
     * Populate the page based on a formState object from localStorage 
     * if the last visit was less than 3 seconds ago (indicating a refresh)
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _loadFromFormState() {
+  function _loadFromFormState() {
 
-		var curTime, 
-				formState, 
-				unloadTime;
-		
-		curTime = new Date().getTime();
+    var curTime, 
+        formState, 
+        unloadTime;
+    
+    curTime = new Date().getTime();
 
-		formState = $.parseJSON(localStorage.getItem("formState"));
-		
-		if(formState) {
+    formState = $.parseJSON(localStorage.getItem("formState"));
+    
+    if(formState) {
 
-			unloadTime = formState.unloadTime;
+      unloadTime = formState.unloadTime;
 
-			if((curTime - unloadTime) < 3000) {
-				$queryBox.val(formState.query);
-				$radius.attr("checked", formState.radius);
-				_showSearchResults();
-			}
+      if((curTime - unloadTime) < 3000) {
+        $queryBox.val(formState.query);
+        $radius.attr("checked", formState.radius);
+        _showSearchResults();
+      }
 
-		}
+    }
 
-	}
+  }
 
   /**
     * Display the Wikipedia/Twitter search results on the page
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _showSearchResults() {
+  function _showSearchResults() {
 
-		var query;
+    var query;
 
-		query = $form.serialize();
+    query = $form.serialize();
 
-		$.when(
-			_getWikiResults(query), 
-			_getTwitterResults(query)
-		).then(function(wikipediaResults, twitterResults) {
-			
-			if(wikipediaResults) _populateWikipediaResults(wikipediaResults);
-			//handle twitter api down
-			if(twitterResults) _populateTwitterResults(twitterResults)
+    $.when(
+      _getWikiResults(query), 
+      _getTwitterResults(query)
+    ).then(function(wikipediaResults, twitterResults) {
+      
+      if(wikipediaResults) _populateWikipediaResults(wikipediaResults);
+      //handle twitter api down
+      if(twitterResults) _populateTwitterResults(twitterResults)
 
-		});
+    });
 
-	}
+  }
 
   /**
     * Validate the search box for completeness
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _validate(query) {
+  function _validate(query) {
 
-		var $errorSpan;
+    var $errorSpan;
 
-		$errorSpan = $form.find(".error-row span");
+    $errorSpan = $form.find(".error-row span");
 
-		if(!query) {
+    if(!query) {
 
-			$queryBox
-				.closest(".form-group")
-				.addClass("has-error");
-			$errorSpan
-				.text("Please enter a topic.");
+      $queryBox
+        .closest(".form-group")
+        .addClass("has-error");
+      $errorSpan
+        .text("Please enter a topic.");
 
-			return false;
+      return false;
 
-		} else {
+    } else {
 
-			$queryBox
-				.closest(".form-group")
-				.removeClass("has-error");
-			$errorSpan
-				.text("");
+      $queryBox
+        .closest(".form-group")
+        .removeClass("has-error");
+      $errorSpan
+        .text("");
 
-			return true;
+      return true;
 
-		}
+    }
 
-	}
+  }
 
   /**
     * Make a REST call to fetch results from the Wikipedia API
@@ -191,13 +193,13 @@ var searchEngine = (function() {
     * @returns {object} A promise object
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _getWikiResults(query) {
-		
-		var promise, 
-				url;
+  function _getWikiResults(query) {
+    
+    var promise, 
+        url;
 
-		promise = $.Deferred();
-		url = "/restapi/GetWikis";
+    promise = $.Deferred();
+    url = "/restapi/GetWikis";
 
     $.ajax({
       cache: false,
@@ -206,55 +208,55 @@ var searchEngine = (function() {
       url: url + "?" + query,
       dataType: "text",
       success: function(json) {
-      	promise.resolve($.parseJSON($.parseJSON(json).body));
+        promise.resolve($.parseJSON($.parseJSON(json).body));
       }, 
       error: function() {
-      	var errorRow;
-      	errorRow = _buildErrorRow("Wikipedia");
-				$("#wikipedia_results").append(errorRow);
-				promise.resolve();
+        var errorRow;
+        errorRow = _buildErrorRow("Wikipedia");
+        $("#wikipedia_results").append(errorRow);
+        promise.resolve();
       }
     });
 
     return promise;
 
-	}
+  }
 
-	/**
+  /**
     * Make a REST call to fetch results from the Twitter API
     *
     * @param {string} query A query string generated by $.serialize
     * @returns {object} A promise object
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _getTwitterResults(query) {
+  function _getTwitterResults(query) {
 
-		var promise,
-		 		url;
+    var promise,
+         url;
 
-		promise = $.Deferred();
-		url = "/restapi/GetTweets";
+    promise = $.Deferred();
+    url = "/restapi/GetTweets";
 
-		$.ajax({
+    $.ajax({
       cache: false,
       crossDomain: true,
       type: "GET",
       url: url + "?" + query,
       dataType: "text",
       success: function(json) {
-      	promise.resolve($.parseJSON($.parseJSON(json)));
+        promise.resolve($.parseJSON($.parseJSON(json)));
       },
       error: function() {
-      	var errorRow;
-      	errorRow = _buildErrorRow("Twitter");
-				$("#wikipedia_results").append(errorRow);
-				promise.resolve();
+        var errorRow;
+        errorRow = _buildErrorRow("Twitter");
+        $("#wikipedia_results").append(errorRow);
+        promise.resolve();
       }
     });
 
     return promise;
     
-	}
+  }
 
   /**
     * Populate the search engine page with Wikipedia search results
@@ -262,27 +264,27 @@ var searchEngine = (function() {
     * @param {object} json A JSON object of search results
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _populateWikipediaResults(json) {
-		
-		var row,
-				$wikipedia_results;
-		
-		$wikipedia_results = $("#wikipedia_results");
-		$wikipedia_results
-			.hide()
-			.empty();
-		
-		//loop through each search result and append to the tabl
-		$.each(json.query.search, function(i, result) {
-			
-			row = _buildRow(result.title, result.snippet);
-			$wikipedia_results.append(row);
+  function _populateWikipediaResults(json) {
+    
+    var row,
+        $wikipedia_results;
+    
+    $wikipedia_results = $("#wikipedia_results");
+    $wikipedia_results
+      .hide()
+      .empty();
+    
+    //loop through each search result and append to the tabl
+    $.each(json.query.search, function(i, result) {
+      
+      row = _buildRow(result.title, result.snippet);
+      $wikipedia_results.append(row);
 
-		});
+    });
 
-		$wikipedia_results.slideDown("2000");
+    $wikipedia_results.slideDown("2000");
 
-	}
+  }
 
   /**
     * Populate the search engine page with Twitter search results
@@ -290,59 +292,25 @@ var searchEngine = (function() {
     * @param {object} json A JSON object of search results
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _populateTwitterResults(json) {
+  function _populateTwitterResults(json) {
 
-		var row, 
-				$twitter_results;
+    var row, 
+        $twitter_results;
 
-		//cache jQuery reference 		
-		$twitter_results = $("#twitter_results");
-		$twitter_results
-			.hide()
-			.empty();
+    //cache jQuery reference     
+    $twitter_results = $("#twitter_results");
+    $twitter_results
+      .hide()
+      .empty();
 
-		$.each(json.statuses, function(i, result) {
-			row = _buildRow("@" + result.user.screen_name, result.text);
-			$twitter_results.append(row);
-		});
+    $.each(json.statuses, function(i, result) {
+      row = _buildRow("@" + result.user.screen_name, result.text);
+      $twitter_results.append(row);
+    });
 
-		$twitter_results.slideDown("2000");
+    $twitter_results.slideDown("2000");
 
-	}
-
-  /**
-    * Populate the search engine page with Twitter search results
-    *
-    * @param {string} cell1 The content for the first cell of the results table
-    * @param {string} cell2 The content for the second cell of the results table
-    * @returns {string} A string of html to be appended to the search results table
-    * @author Fleming Slone [fslone@gmail.com]
-   */
-	function _buildRow(cell1, cell2) {
-		
-		var	rowOpen, 
-				rowClose, 
-				cell1Open, 
-				cell1Close, 
-				cell2Open, 
-				cell2Close, 
-				row; 
-
-		rowOpen = "<div class='row'>";
-		cell1Open = "<div class='col-sm-4 col-xs-12'><strong>";
-		cell1Close = "</strong></div>";
-		cell2Open = "<div class='col-sm-8 col-xs-12'>";
-		cell2Close = "</div>";
-		rowClose = "</div>";
-
-		row = rowOpen;
-		row += cell1Open + cell1 + cell1Close;
-		row += cell2Open + cell2 + cell2Close;
-		row += rowClose;
-
-		return row;
-
-	}
+  }
 
   /**
     * Populate the search engine page with Twitter search results
@@ -352,39 +320,73 @@ var searchEngine = (function() {
     * @returns {string} A string of html to be appended to the search results table
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _buildErrorRow(service) {
-		
-		var	rowOpen, 
-				rowClose, 
-				cell1Open, 
-				cell1Close, 
-				cell2Open, 
-				cell2Close, 
-				row; 
+  function _buildRow(cell1, cell2) {
+    
+    var  rowOpen, 
+        rowClose, 
+        cell1Open, 
+        cell1Close, 
+        cell2Open, 
+        cell2Close, 
+        row; 
 
-		rowOpen = "<div class='row'>";
-		cell1Open = "<div class='col-xs-12 alert alert-danger'><strong>";
-		cell1Close = "</strong></div>";
-		rowClose = "</div>";
+    rowOpen = "<div class='row'>";
+    cell1Open = "<div class='col-sm-4 col-xs-12'><strong>";
+    cell1Close = "</strong></div>";
+    cell2Open = "<div class='col-sm-8 col-xs-12'>";
+    cell2Close = "</div>";
+    rowClose = "</div>";
 
-		row = rowOpen;
-		row += cell1Open;
-		row += "We're sorry, but the " + service + " API appears to be down."
-		row += cell1Close;
-		row += rowClose;
+    row = rowOpen;
+    row += cell1Open + cell1 + cell1Close;
+    row += cell2Open + cell2 + cell2Close;
+    row += rowClose;
 
-		return row;
+    return row;
 
-	}
+  }
 
-	return {
-		init: _init,
-		buildRow: _buildRow,
-		buildErrorRow: _buildErrorRow,
-		getTwitterResults: _getTwitterResults,
-		getWikiResults: _getWikiResults,
-		validate: _validate
-	}
+  /**
+    * Populate the search engine page with Twitter search results
+    *
+    * @param {string} cell1 The content for the first cell of the results table
+    * @param {string} cell2 The content for the second cell of the results table
+    * @returns {string} A string of html to be appended to the search results table
+    * @author Fleming Slone [fslone@gmail.com]
+   */
+  function _buildErrorRow(service) {
+    
+    var  rowOpen, 
+        rowClose, 
+        cell1Open, 
+        cell1Close, 
+        cell2Open, 
+        cell2Close, 
+        row; 
+
+    rowOpen = "<div class='row'>";
+    cell1Open = "<div class='col-xs-12 alert alert-danger'><strong>";
+    cell1Close = "</strong></div>";
+    rowClose = "</div>";
+
+    row = rowOpen;
+    row += cell1Open;
+    row += "We're sorry, but the " + service + " API appears to be down."
+    row += cell1Close;
+    row += rowClose;
+
+    return row;
+
+  }
+
+  return {
+    init: _init,
+    buildRow: _buildRow,
+    buildErrorRow: _buildErrorRow,
+    getTwitterResults: _getTwitterResults,
+    getWikiResults: _getWikiResults,
+    validate: _validate
+  }
 
 }());
 

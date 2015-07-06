@@ -7,13 +7,16 @@
   var _server;
       
   function _init() {
-  	_start();
-  	_registerRestCalls();
+
+    _start();
+    _registerRestCalls();
+
   }
 
   function _start() {
     
-    var port, clientDir;
+    var port, 
+        clientDir;
     
     if(process.env.PORT) {
       port = process.env.PORT;
@@ -83,7 +86,8 @@
 
     function __getWikis(req, res, next) {
 
-    	var query, url;
+      var query, 
+          url;
 
       query = req.params.query;
       url = "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch=" + query
