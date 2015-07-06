@@ -34,15 +34,19 @@ var searchEngine = (function() {
 		$form
 			.find(".btn-primary")
 			.click(function(e) {		
+				var query;
 				e.preventDefault();		
-				if(_validate()) _showSearchResults();
+				query = $queryBox.val();
+				if(_validate(query)) _showSearchResults();
 			});
 
 		//bind the return key
 		$queryBox
 			.on("keypress", function(e) {
+				var query;
 				if(e.which===13) {
-					if(_validate()) _showSearchResults();
+					query = $queryBox.val();
+					if(_validate(query)) _showSearchResults();
 				}
 			});
 	
@@ -61,7 +65,6 @@ var searchEngine = (function() {
 				_setFormState();
 			})
 			.load(function() {
-				console.log("boom")
 				_loadFromFormState();
 			});
 
@@ -139,7 +142,6 @@ var searchEngine = (function() {
 		).then(function(wikipediaResults, twitterResults) {
 			
 			if(wikipediaResults) _populateWikipediaResults(wikipediaResults);
-
 			//handle twitter api down
 			if(twitterResults) _populateTwitterResults(twitterResults)
 
@@ -152,13 +154,11 @@ var searchEngine = (function() {
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
-	function _validate() {
+	function _validate(query) {
 
-		var $errorSpan, 
-				query;
+		var $errorSpan;
 
 		$errorSpan = $form.find(".error-row span");
-		query = $queryBox.val();
 
 		if(!query) {
 
@@ -380,7 +380,10 @@ var searchEngine = (function() {
 	return {
 		init: _init,
 		buildRow: _buildRow,
-		buildErrorRow: _buildErrorRow
+		buildErrorRow: _buildErrorRow,
+		getTwitterResults: _getTwitterResults,
+		getWikiResults: _getWikiResults,
+		validate: _validate
 	}
 
 }());
