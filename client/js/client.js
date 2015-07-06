@@ -1,15 +1,21 @@
-(function() {
+var searchEngine = (function() {
+	
+	var $form,
+			$queryBox,
+			$radius;
 
-	var $form;
-
-	/**
+  /**
     * Initialize the Wikipedia/Twitter search page
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
 	function _init() {
 		
+		//cache some refrences that will be used 
+		//across multiple functions
 		$form = $("#queryForm");
+		$queryBox = $form.find("#query_box");
+		$radius = $form.find("#radius");
 		
 		_bindUI();
 
@@ -17,7 +23,7 @@
 	
 	}
 
-	/**
+  /**
     * Bind UI elements for the search engine page
     *
     * @author Fleming Slone [fslone@gmail.com]
@@ -27,17 +33,13 @@
 		//bind the search button
 		$form
 			.find(".btn-primary")
-			.click(function(e) {
-			
-				e.preventDefault();
-				
+			.click(function(e) {		
+				e.preventDefault();		
 				if(_validate()) _showSearchResults();
-
 			});
 
 		//bind the return key
-		$form
-			.find("#query_box")
+		$queryBox
 			.on("keypress", function(e) {
 				if(e.which===13) {
 					if(_validate()) _showSearchResults();
@@ -47,6 +49,80 @@
 	}
 
 	/**
+    * Re-populate the search box, radius checkbox and search results 
+    * if the page is refreshed.
+    *
+    * @author Fleming Slone [fslone@gmail.com]
+   */
+	function _bindRefresh() {
+
+		$(window)
+			.unload(function(){
+				_setFormState();
+			})
+			.load(function() {
+				console.log("boom")
+				_loadFromFormState();
+			});
+
+	}
+
+	/**
+    * Set formState object in localStorage to save last page visit
+    *
+    * @author Fleming Slone [fslone@gmail.com]
+   */
+	function _setFormState() {
+
+		var time, 
+				queryVal, 
+				radiusVal, 
+				formState;
+
+		time = new Date().getTime();
+		queryVal = $queryBox.val();
+		radiusVal = $radius.is(":checked");
+		formState = {
+			query: queryVal,
+			radius: radiusVal,
+			unloadTime: time
+		};
+
+		localStorage.setItem("formState", JSON.stringify(formState));
+
+	}
+
+	/**
+    * Populate the page based on a formState object from localStorage 
+    * if the last visit was less than 3 seconds ago (indicating a refresh)
+    *
+    * @author Fleming Slone [fslone@gmail.com]
+   */
+	function _loadFromFormState() {
+
+		var curTime, 
+				formState, 
+				unloadTime;
+		
+		curTime = new Date().getTime();
+
+		formState = $.parseJSON(localStorage.getItem("formState"));
+		
+		if(formState) {
+
+			unloadTime = formState.unloadTime;
+
+			if((curTime - unloadTime) < 3000) {
+				$queryBox.val(formState.query);
+				$radius.attr("checked", formState.radius);
+				_showSearchResults();
+			}
+
+		}
+
+	}
+
+  /**
     * Display the Wikipedia/Twitter search results on the page
     *
     * @author Fleming Slone [fslone@gmail.com]
@@ -71,71 +147,16 @@
 
 	}
 
-	/**
-    * Re-populate the search box, radius checkbox and search results 
-    * if the page is refreshed.
-    *
-    * @author Fleming Slone [fslone@gmail.com]
-   */
-	function _bindRefresh() {
-
-		var $queryBox, $radius;
-
-		$queryBox = $form.find("#query_box");
-		$radius = $form.find("#radius");
-
-		$(window)
-			.unload(function(){
-
-				var time, queryVal, radiusVal, formState;
-
-				time = new Date().getTime();
-				queryVal = $queryBox.val();
-				radiusVal = $radius.is(":checked");
-				formState = {
-					query: queryVal,
-					radius: radiusVal,
-					unloadTime: time
-				};
-
-				localStorage.setItem("formState", JSON.stringify(formState));
-
-			})
-			.load(function() {
-
-				var curTime, formState, unloadTime;
-				
-				curTime = new Date().getTime();
-				formState = localStorage.getItem("formState");
-				
-				if(formState) {
-
-					formState = $.parseJSON(localStorage.getItem("formState"));
-					unloadTime = formState.unloadTime;
-
-					if((curTime - unloadTime) < 3000) {
-						$queryBox.val(formState.query);
-						$radius.attr("checked", formState.radius);
-						_showSearchResults();
-					}
-
-				}
-
-			});
-
-	}
-
-	/**
+  /**
     * Validate the search box for completeness
     *
     * @author Fleming Slone [fslone@gmail.com]
    */
 	function _validate() {
 
-		var $queryBox, $errorSpan, query;
+		var $errorSpan, 
+				query;
 
-
-		$queryBox = $form.find("#query_box");
 		$errorSpan = $form.find(".error-row span");
 		query = $queryBox.val();
 
@@ -163,45 +184,17 @@
 
 	}
 
-	/**
-    * Make a REST call to fetch results from the Twitter API
-    *
-    * @author Fleming Slone [fslone@gmail.com]
-   */
-	function _getTwitterResults(query) {
-
-		var promise, url;
-
-		promise = $.Deferred();
-		url = "/restapi/GetTweets";
-
-		$.ajax({
-      cache: false,
-      crossDomain: true,
-      type: "GET",
-      url: url + "?" + query,
-      dataType: "text",
-      success: function(json) {
-      	promise.resolve($.parseJSON($.parseJSON(json)));
-      },
-      error: function() {
-      	errorRow = _buildErrorRow("Twitter");
-				$("#wikipedia_results").append(errorRow);
-				promise.resolve();
-      }
-    });
-
-    return promise;
-	}
-
-	/**
+  /**
     * Make a REST call to fetch results from the Wikipedia API
     *
+    * @param {string} query A query string generated by $.serialize
+    * @returns {object} A promise object
     * @author Fleming Slone [fslone@gmail.com]
    */
 	function _getWikiResults(query) {
 		
-		var promise, url;
+		var promise, 
+				url;
 
 		promise = $.Deferred();
 		url = "/restapi/GetWikis";
@@ -216,6 +209,7 @@
       	promise.resolve($.parseJSON($.parseJSON(json).body));
       }, 
       error: function() {
+      	var errorRow;
       	errorRow = _buildErrorRow("Wikipedia");
 				$("#wikipedia_results").append(errorRow);
 				promise.resolve();
@@ -223,28 +217,66 @@
     });
 
     return promise;
+
 	}
 
 	/**
+    * Make a REST call to fetch results from the Twitter API
+    *
+    * @param {string} query A query string generated by $.serialize
+    * @returns {object} A promise object
+    * @author Fleming Slone [fslone@gmail.com]
+   */
+	function _getTwitterResults(query) {
+
+		var promise,
+		 		url;
+
+		promise = $.Deferred();
+		url = "/restapi/GetTweets";
+
+		$.ajax({
+      cache: false,
+      crossDomain: true,
+      type: "GET",
+      url: url + "?" + query,
+      dataType: "text",
+      success: function(json) {
+      	promise.resolve($.parseJSON($.parseJSON(json)));
+      },
+      error: function() {
+      	var errorRow;
+      	errorRow = _buildErrorRow("Twitter");
+				$("#wikipedia_results").append(errorRow);
+				promise.resolve();
+      }
+    });
+
+    return promise;
+    
+	}
+
+  /**
     * Populate the search engine page with Wikipedia search results
     *
+    * @param {object} json A JSON object of search results
     * @author Fleming Slone [fslone@gmail.com]
    */
 	function _populateWikipediaResults(json) {
 		
-		var $search_container, $wikipedia_results, row;
+		var row,
+				$wikipedia_results;
 		
-		//cache jQuery reference 		
 		$wikipedia_results = $("#wikipedia_results");
-		$wikipedia_results.hide();
-		$wikipedia_results.empty();
+		$wikipedia_results
+			.hide()
+			.empty();
 		
-
 		//loop through each search result and append to the tabl
 		$.each(json.query.search, function(i, result) {
 			
 			row = _buildRow(result.title, result.snippet);
-			$wikipedia_results.append(row)
+			$wikipedia_results.append(row);
 
 		});
 
@@ -252,29 +284,40 @@
 
 	}
 
-	/**
+  /**
     * Populate the search engine page with Twitter search results
     *
+    * @param {object} json A JSON object of search results
     * @author Fleming Slone [fslone@gmail.com]
    */
 	function _populateTwitterResults(json) {
 
-		var row, $search_container, $twitter_results;
+		var row, 
+				$twitter_results;
 
 		//cache jQuery reference 		
 		$twitter_results = $("#twitter_results");
-		$twitter_results.hide();
-		$twitter_results.empty();
+		$twitter_results
+			.hide()
+			.empty();
 
 		$.each(json.statuses, function(i, result) {
 			row = _buildRow("@" + result.user.screen_name, result.text);
-			$twitter_results.append(row)
+			$twitter_results.append(row);
 		});
 
 		$twitter_results.slideDown("2000");
 
 	}
 
+  /**
+    * Populate the search engine page with Twitter search results
+    *
+    * @param {string} cell1 The content for the first cell of the results table
+    * @param {string} cell2 The content for the second cell of the results table
+    * @returns {string} A string of html to be appended to the search results table
+    * @author Fleming Slone [fslone@gmail.com]
+   */
 	function _buildRow(cell1, cell2) {
 		
 		var	rowOpen, 
@@ -301,7 +344,16 @@
 
 	}
 
+  /**
+    * Populate the search engine page with Twitter search results
+    *
+    * @param {string} cell1 The content for the first cell of the results table
+    * @param {string} cell2 The content for the second cell of the results table
+    * @returns {string} A string of html to be appended to the search results table
+    * @author Fleming Slone [fslone@gmail.com]
+   */
 	function _buildErrorRow(service) {
+		
 		var	rowOpen, 
 				rowClose, 
 				cell1Open, 
@@ -322,8 +374,15 @@
 		row += rowClose;
 
 		return row;
+
 	}
 
-	return _init();
+	return {
+		init: _init,
+		buildRow: _buildRow,
+		buildErrorRow: _buildErrorRow
+	}
 
 }());
+
+searchEngine.init();
