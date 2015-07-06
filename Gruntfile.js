@@ -60,7 +60,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-sass");
   grunt.loadNpmTasks("grunt-contrib-uglify");
-  grunt.loadNpmTasks("grunt-jsdoc");
 
   // Register tasks
   grunt.registerTask("build", [
@@ -68,8 +67,7 @@ module.exports = function(grunt) {
     "concat",
     "concat_css:all",
     "uglify",
-    "cssmin",
-    "jsdoc"
+    "cssmin"
   ]);
 };
 
