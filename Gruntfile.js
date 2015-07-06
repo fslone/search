@@ -3,19 +3,19 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     concat: {
-	    options: {
-	      separator: ";",
-	    },
-	    dist: {
-	      src: ["client/js/vendor/*.js", "client/js/client.js"],
-	      dest: "client/js/main.min.js",
-	    },
-	  },
-	  concat_css: {
-    	all: {
+      options: {
+        separator: ";",
+      },
+      dist: {
+        src: ["client/js/vendor/*.js", "client/js/client.js"],
+        dest: "client/js/main.min.js",
+      },
+    },
+    concat_css: {
+      all: {
         src: ["client/css/vendor/*.css", "client/css/client.css"],
-    	   dest: "client/css/styles.min.css"
-	    }
+         dest: "client/css/styles.min.css"
+      }
     },
     jsdoc : {
       dist : {
@@ -71,4 +71,4 @@ module.exports = function(grunt) {
   ]);
 };
 
-	
+  
