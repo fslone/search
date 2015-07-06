@@ -7,8 +7,10 @@
   var _server;
       
   function _init() {
+
     _start();
     _registerRestCalls();
+
   }
 
   function _start() {
